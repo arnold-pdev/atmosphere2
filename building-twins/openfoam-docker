@@ -428,10 +428,10 @@ then
     set -x
 fi
 
-exec $runPrefix ${toolChain:?} run \ # Start the Docker container. Toolchain is the set of all the tools that are used to build the image: executable, build tool, compilers, debugger binary, and working environment.
+exec $runPrefix ${toolChain:?} run \
     --rm -t -i \
     --user="$guest_uid:$guest_gid" \
-    ${mount1Dir:+--volume="$mount1Dir:$container_home"} \ # Mount the host directory to the container directory
+    ${mount1Dir:+--volume="$mount1Dir:$container_home"} \
     ${mount2Dir:+--volume="$mount2Dir:/data"} \
     $(x11Mapping) \
     ${optShmSize:+--shm-size="$optShmSize"} \
@@ -439,3 +439,4 @@ exec $runPrefix ${toolChain:?} run \ # Start the Docker container. Toolchain is 
     "$image" $optShellCommand "$@"
 
 # ---------------------------------------------------------------------------
+
