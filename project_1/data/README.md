@@ -1,3 +1,12 @@
-Datasets collected from the OpenFOAM model for particular realizations of the parameters.
+Dataset collected from the OpenFOAM model using secret parameters.
 
-Include run parameters with data.
+environment
+|-datetime
+|-interior
+|  |-xyz
+|  |-temp
+|  |-hum
+|  |-wind
+|-exterior
+|  |-temp
+|  |-hum
