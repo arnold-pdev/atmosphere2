@@ -1,0 +1,39 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# Setup case
+./Allrun.pre
+
+#-- Run on single processor
+
+# Agglomerate patch faces
+#for region in air
+#do
+#    runApplication -s $region \
+#        faceAgglomerate -region $region -dict constant/viewFactorsDict
+#done
+
+# Generate view factors
+for region in exterior
+do
+    runApplication -s $region \
+        viewFactorsGen -region $region
+done
+
+for region in interior
+do
+    runApplication -s $region \
+        viewFactorsGen -region $region
+done
+
+runApplication $(getApplication)
+
+# if [[ "$@" == "*-vtk*" ]]; then
+#     runApplication foamToVTK #-fields '(U p T)'
+#     current_time=$(date "+%m-%d-%Y_%H.%M.%S")
+#     mv VTK "VTK_$current_time"
+# fi
+
+#------------------------------------------------------------------------------

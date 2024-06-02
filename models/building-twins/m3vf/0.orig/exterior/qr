@@ -1,0 +1,67 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      qr;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 0 -3 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+    back
+    {
+        type            empty;
+    }
+
+    front
+    {
+        type            empty;
+    }
+
+    maxX
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    maxZ
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    minX
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    exterior_to_ground
+    {
+        type            greyDiffusiveRadiationViewFactor;
+        qro             uniform 0;
+        value           uniform 0;
+    }
+
+    exterior_to_envelope
+    {
+        type            greyDiffusiveRadiationViewFactor;
+        qro             uniform 0;
+        value           uniform 0;
+    }
+}
+
+
+// ************************************************************************* //

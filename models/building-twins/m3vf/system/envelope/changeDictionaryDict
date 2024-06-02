@@ -1,0 +1,65 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dictionaryReplacement
+{
+    T
+    {
+        internalField   uniform 300;
+
+        boundaryField
+        {
+            envelope_to_interior
+            {
+                type            compressible::turbulentTemperatureRadCoupledMixed;
+                Tnbr            T;
+                kappaMethod     solidThermo;
+                qrNbr           qr;
+                qr              none;
+                kappa           none;
+                thermalInertia  true;
+                value           uniform 300;
+            }
+
+            envelope_to_exterior
+            {
+                type            compressible::turbulentTemperatureRadCoupledMixed;
+                Tnbr            T;
+                kappaMethod     solidThermo;
+                qrNbr           qr;
+                qr              none;
+                kappa           none;
+                thermalInertia  true;
+                value           uniform 300;
+            }
+
+            envelope_to_ground
+            {
+                type            compressible::turbulentTemperatureRadCoupledMixed;
+                Tnbr            T;
+                kappaMethod     solidThermo;
+                qrNbr           none;
+                qr              none;
+                kappa           none;
+                thermalInertia  true;
+                value           uniform 300;
+            }
+        }
+    }
+}
+
+
+// ************************************************************************* //

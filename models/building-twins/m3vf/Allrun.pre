@@ -1,0 +1,34 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+runApplication gmshToFoam ./gmsh/g2grd.msh
+runApplication splitMeshRegions -cellZones -overwrite
+
+# edit the boundary file (full domain)
+# repeat this for each region
+sed -i '/minZ/,/}/ s/type[[:space:]]*patch/type            wall/g' constant/polyMesh/boundary
+
+sed -i '/back/,/}/ s/type[[:space:]]*patch/type            empty/' constant/polyMesh/boundary
+sed -i '/front/,/}/ s/type[[:space:]]*patch/type            empty/' constant/polyMesh/boundary
+
+for region in $(foamListRegions)
+do
+    # echo $region
+    sed -i '/minZ/,/}/ s/type[[:space:]]*patch/type            wall/g' constant/$region/polyMesh/boundary
+    sed -i '/back/,/}/ s/type[[:space:]]*patch/type            empty/' constant/$region/polyMesh/boundary
+    sed -i '/front/,/}/ s/type[[:space:]]*patch/type            empty/' constant/$region/polyMesh/boundary
+done
+
+
+# Set the initial fields
+restore0Dir
+
+for region in $(foamListRegions)
+do
+    runApplication -s $region changeDictionary \
+        -region $region -subDict dictionaryReplacement
+done
+
+#------------------------------------------------------------------------------
