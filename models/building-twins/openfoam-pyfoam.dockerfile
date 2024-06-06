@@ -6,7 +6,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # 1. A docker build command that works inside of models/building-twins: 
 #    docker build -f openfoam-pyfoam.dockerfile -t <image-name> .
 # 2. A docker run command that works inside of models/building-twins:
-#    docker run -it --mount src=$PWD/building-twins/m1_bcs,target=/openfoam,type=bind <image-name>
+#    docker run -it --mount src=$PWD/building-twins/<model-folder>,target=/openfoam,type=bind <image-name>
 # Install essential packages and dependencies
 RUN apt update && \
     apt install -y sudo software-properties-common wget curl nano git mcedit vim htop build-essential ca-certificates mercurial libboost-all-dev ssh ffmpeg python3 python3-pip
