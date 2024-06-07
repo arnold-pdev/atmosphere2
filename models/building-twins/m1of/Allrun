@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
@@ -24,7 +24,19 @@ runApplication checkMesh
 
 runApplication $(getApplication)
 
-if [[ "$@" == "*-vtk*" ]]; then
+# Flag to check if -vtk is present
+vtk_flag=0
+
+# Check each argument
+for arg in "$@"; do
+    if [[ "$arg" == "-vtk" ]]; then
+        vtk_flag=1
+        break
+    fi
+done
+
+if [[ $vtk_flag -eq 1 ]]; then
+    echo "-vtk argument detected"
     runApplication foamToVTK -fields '(U p T)'
     current_time=$(date "+%m-%d-%Y_%H.%M.%S")
     mv VTK "VTK_$current_time"
