@@ -1,3 +1,4 @@
+import os
 import argparse
 import subprocess
 
@@ -17,12 +18,14 @@ def run_openfoam(
     # Ensure host directory exists and prepare it
     # subprocess.run(["mkdir", "-p", host_dir], check=True)
 
+    abs_host_dir = os.path.abspath(host_dir)
+
     docker_command = [
         "docker",
         "run",
         "-it",
         "--mount",
-        f"type=bind,source={host_dir},target={container_dir}",
+        f"type=bind,source={abs_host_dir},target={container_dir}",
         container_name,
         "/bin/bash",
         "-c",
@@ -40,7 +43,7 @@ def main():
     args = parser.parse_args()
 
     # container_name = "my-openfoam:latest"
-    host_dir = "/home/ilya/github/atmosphere2/models/building-twins"
+    host_dir = "../../models/building-twins"
     container_dir = "/home/foam/openfoam"
     boundary_conditions = {
         "case/system/boundaryConditions": "/* Your boundary condition settings */"
