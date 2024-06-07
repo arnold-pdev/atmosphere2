@@ -8,7 +8,6 @@ restore0Dir
 #runApplication blockMesh
 
 #add in gmsh meshing
-# gmsh -3 -optimize_netgen cylinder.geo -o cylinder.msh -format msh2
 runApplication gmshToFoam ./gmsh/g1_refined.msh
 
 # need to specify patches as empty (Contrib modifyPatches https://openfoamwiki.net/index.php/Contrib_modifyPatches). seems like the best way to do this is to fetch the utility from the github repo and compile it in the openfoam-docker shell script (modifyPatches works up til OF v2206).
