@@ -40,7 +40,7 @@ def main():
     args = parser.parse_args()
 
     # container_name = "my-openfoam:latest"
-    host_dir = "/home/ilya/github/atmosphere2/models/building-twins/m1of"
+    host_dir = "/home/ilya/github/atmosphere2/models/building-twins"
     container_dir = "/home/foam/openfoam"
     boundary_conditions = {
         "case/system/boundaryConditions": "/* Your boundary condition settings */"
