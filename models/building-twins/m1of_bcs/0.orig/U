@@ -37,9 +37,11 @@ boundaryField
 
     bottom
     {
-        name     prescribedVelocity;
-        type			codedFixedValue;
-        value            $internalField;
+        name                customBC_U;
+        type			     codedMixed;
+        refValue         $internalField;
+        refGradient     uniform (0 0 0);
+        valueFraction         uniform 1; // 0 for Neumann, 1 for Dirichlet
         // check codeDict for the code
     }
 
