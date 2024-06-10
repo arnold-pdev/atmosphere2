@@ -1,4 +1,4 @@
-This directory contains trained neural operator surrogate models emulating corresponding building twins. The neural operators, $\mathcal{F}$ act as maps
+This directory contains trained neural-operator-based surrogate models emulating corresponding building twins. The neural operators, $\mathcal{F}$ act as maps
 ```math
   \mathcal{F}:\mathcal{U}\times\mathcal{M}\to\mathcal{U}^\tau,
 ```
