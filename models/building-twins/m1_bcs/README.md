@@ -1,5 +1,5 @@
 # Model-1: BCs
-Model-1 uses OpenFOAM to simulate conjugate heat transfer due to convection and conduction, not including radiation, in Geometry-1, which is a two-dimensional cross-section of a simplified Biosphere 2. Fixed temperature boundary conditions are applied to the walls. The physics solvers being used are:
+Model-1 uses OpenFOAM to simulate conjugate heat transfer due to convection and conduction, not including radiation, in Geometry-1, which is a two-dimensional cross-section of a simplified geometry of the Biosphere 2 TRF. Fixed temperature boundary conditions are applied to the walls. The physics solvers being used are:
 - buoyantBoussinesqPimpleFoam (transient solver)
 
 Custom boundary conditions can be implemented in the codeDict dictionary file located in system to set the fields (refValue, refGrad, and valueFraction) of the codedMixed boundary condition.
