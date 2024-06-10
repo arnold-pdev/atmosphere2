@@ -13,4 +13,4 @@ where $u_c$ is the patch internal cell value, $\nabla_\perp$ is the normal deriv
 ----
 This model was developed from the [OpenFOAM tutorial hotRoom](https://develop.openfoam.com/Development/openfoam/-/tree/master/tutorials/heatTransfer/buoyantBoussinesqPimpleFoam/hotRoom) on [natural convection in a rectangular domain](https://www.xsim.info/articles/OpenFOAM/en-US/tutorials/heatTransfer-buoyantBoussinesqPimpleFoam-hotRoom.html).
 
-Geometry-2 is encoded as a .msh file, and so must be converted using [gmshToFoam](https://openfoamwiki.net/index.php/GmshToFoam). This step is included in the Allrun script.
+Geometry-1 is encoded as a .msh file, and so must be converted using [gmshToFoam](https://openfoamwiki.net/index.php/GmshToFoam). This step is included in the Allrun script.
