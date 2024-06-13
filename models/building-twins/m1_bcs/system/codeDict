@@ -1,0 +1,81 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      codeDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+customBC_T
+{
+    code
+        #{
+           //  Define your constants, pull in the patch and face centers
+           const scalar A = 0.0, B = 0.0, C = 5.0;
+           const scalar pi = 3.14159265358979323846;
+           // access the face centers (Cf)
+           const fvPatch& patch = this->patch();
+           const vectorField& cf = patch.Cf();
+            // refValue:
+              forAll(patch, i)
+              {
+                this->refValue()[i]  = //refValue or refGrad
+                // A*sin(2*pi/46*cf[i].x()) // sine
+                // -A*cf[i].x()*cf[i].x()/23.0/23.0 + A //parabolic
+                300-A*Foam::exp( -Foam::pow((cf[i].x() - B), 2) / (2*C*C) ) //gaussian
+                ;
+              }
+            // refGrad:
+               forAll(patch, i)
+               {
+                 this->refGrad()[i] = 0;
+               }
+            // valueFraction:
+        #};
+}
+
+customBC_U
+{
+    code
+        #{
+           //  Define your constants, pull in the patch and face centers
+           const scalar A = 10, B = 0.0, C = 1.0;
+           const scalar pi = 3.14159265358979323846;
+           // access the face centers (Cf)
+           const fvPatch& patch = this->patch();
+           const vectorField& cf = patch.Cf();
+            // refValue:
+              forAll(patch, i)
+              {
+                // if (abs(cf[i].x()) < 23.0/2.0 ) {
+                    this->refValue()[i] = 
+                    vector(
+                        0, 
+                        0, 
+                    // -A*cf[i].x()*cf[i].x()/23.0/23.0 + A
+                        A*cos(2*pi/46*cf[i].x()) // sine
+                    // A*Foam::exp( -Foam::pow((cf[i].x() - B), 2) / (2*C*C) )
+                    ) ;
+                // }
+                // else {
+                    // this->refValue()[i] = vector(0, 0, 0);
+                // }
+            // refGrad:
+               forAll(patch, i)
+               {
+                 this->refGrad()[i] = vector(0, 0, 0);
+               }
+            // valueFraction:
+              }
+        #};
+}
+// ************************************************************************* //

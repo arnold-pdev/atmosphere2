@@ -1,0 +1,84 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform 300;
+
+// use patchFunctions to provide time-varying boundary conditions
+boundaryField
+{
+    "(back|front)"
+    {
+        type            empty;
+    }
+
+    eastBase
+    {
+        type            fixedValue;
+        value           uniform 300;
+    }
+
+    westBase
+    {
+        type            fixedValue;
+        value           uniform 300;
+    }
+
+    bottom
+    {
+        name               customBC_T;
+        type			   codedMixed;
+        refValue       $internalField;
+        refGradient         uniform 0;
+        valueFraction       uniform 1; // 0 for heat flux, 1 for temperature
+        // code in codeDict: customBC_T
+    }
+
+    eastSlope
+    {
+        type            fixedValue;
+        value           uniform 400;
+    }
+
+    eastLedge
+    {
+        type            fixedValue;
+        value           uniform 350;
+    }
+
+    westLedge
+    {
+        type            fixedValue;
+        value           uniform 300;
+    }
+
+    westSlope
+    {
+        type            fixedValue;
+        value           uniform 300;
+    }
+
+    topFace
+    {
+        type            fixedValue;
+        value           uniform 380;
+    }
+}
+
+
+// ************************************************************************* //
+
