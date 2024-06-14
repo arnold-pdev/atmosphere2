@@ -1,7 +1,10 @@
-r#!/bin/bash
-cd "${0%/*}" || exit                                # Run from this directory
-. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#!/bin/bash
+cd "${0%/*}" || exit                         # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions # Tutorial run functions
 #------------------------------------------------------------------------------
+
+snapshot_before=$(mktemp)
+find . -type f -exec md5sum {} + >"$snapshot_before"
 
 restore0Dir
 
@@ -14,9 +17,8 @@ runApplication gmshToFoam ./gmsh/g1_refined.msh
 # probably easier to just go into the file and change the text using sed, stream editor, to change the type of the patches to empty.
 sed -i 's/type[[:space:]]*patch/type            wall/g' constant/polyMesh/boundary
 
-sed -i '/back/,/}/ s/type[[:space:]]*wall/type            empty/' constant/polyMesh/boundary                                                                 
+sed -i '/back/,/}/ s/type[[:space:]]*wall/type            empty/' constant/polyMesh/boundary
 sed -i '/front/,/}/ s/type[[:space:]]*wall/type            empty/' constant/polyMesh/boundary
-
 
 runApplication checkMesh
 #runApplication setFields
@@ -28,15 +30,30 @@ vtk_flag=0
 
 # Check each argument
 for arg in "$@"; do
-    if [[ "$arg" == "-vtk" ]]; then
-        vtk_flag=1
-        break
-    fi
+	if [[ "$arg" == "-vtk" ]]; then
+		vtk_flag=1
+		break
+	fi
 done
 
 if [[ $vtk_flag -eq 1 ]]; then
-    echo "-vtk argument detected"
-    runApplication foamToVTK -fields '(U p T)'
-    current_time=$(date "+%m-%d-%Y_%H.%M.%S")
-    mv VTK "VTK_$current_time"
+	echo "-vtk argument detected"
+	runApplication foamToVTK -fields '(U p T)'
+	current_time=$(date "+%m-%d-%Y_%H.%M.%S")
+	mv VTK "VTK_$current_time"
 fi
+
+# Create another snapshot after the execution
+target_dir="/local/$(basename $(pwd))"
+mkdir -p "$target_dir"
+
+snapshot_after=$(mktemp)
+find . -type f -exec md5sum {} + >"$snapshot_after"
+rsync -aq --files-from=<(comm -13 <(sort "$snapshot_before") <(sort "$snapshot_after") | cut -d ' ' -f 3) . "$target_dir/"
+for file in $(comm -13 <(sort "$snapshot_before") <(sort "$snapshot_after") | cut -d ' ' -f 3); do
+	if [ -f "$file" ]; then
+		rm "$file"
+	fi
+done
+find . -type d -empty -delete
+rm "$snapshot_before" "$snapshot_after"
