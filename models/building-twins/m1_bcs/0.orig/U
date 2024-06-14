@@ -9,76 +9,72 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      T;
+    class       volVectorField;
+    object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 1 0 0 0];
+dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform 300;
+internalField   uniform (0 0 0);
 
-// use patchFunctions to provide time-varying boundary conditions
 boundaryField
 {
-    "(back|front)"
+    back
     {
         type            empty;
     }
 
     eastBase
     {
-        type            fixedValue;
-        value           uniform 300;
+        type            noSlip;
     }
 
     westBase
     {
-        type            fixedValue;
-        value           uniform 300;
+        type            noSlip;
     }
 
     bottom
     {
-        name      prescribedHeatFlux;
-        type			codedMixed;
-        refValue            uniform 0;
-        refGradient         uniform 0;
-        valueFraction       uniform 1; // 0 for heat flux, 1 for temperature
+        name                customBC_U;
+        type			     codedMixed;
+        refValue         $internalField;
+        refGradient     uniform (0 0 0);
+        valueFraction         uniform 1; // 0 for Neumann, 1 for Dirichlet
         // check codeDict for the code
+    }
+
+    front
+    {
+        type            empty;
     }
 
     eastSlope
     {
-        type            fixedValue;
-        value           uniform 400;
+        type            noSlip;
     }
 
     eastLedge
     {
-        type            fixedValue;
-        value           uniform 350;
+        type            noSlip;
     }
 
     westLedge
     {
-        type            fixedValue;
-        value           uniform 300;
+        type            noSlip;
     }
 
     westSlope
     {
-        type            fixedValue;
-        value           uniform 300;
+        type            noSlip;
     }
 
     topFace
     {
-        type            fixedValue;
-        value           uniform 380;
+        type            noSlip;
     }
 }
 
 
 // ************************************************************************* //
-

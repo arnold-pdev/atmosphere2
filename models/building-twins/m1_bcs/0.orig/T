@@ -9,70 +9,76 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      U;
+    class       volScalarField;
+    object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dimensions      [0 0 0 1 0 0 0];
 
-internalField   uniform (0 0 0);
+internalField   uniform 300;
 
+// use patchFunctions to provide time-varying boundary conditions
 boundaryField
 {
-    back
+    "(back|front)"
     {
         type            empty;
     }
 
     eastBase
     {
-        type            noSlip;
+        type            fixedValue;
+        value           uniform 300;
     }
 
     westBase
     {
-        type            noSlip;
+        type            fixedValue;
+        value           uniform 300;
     }
 
     bottom
     {
-        name     prescribedVelocity;
-        type			codedFixedValue;
-        value            $internalField;
-        // check codeDict for the code
-    }
-
-    front
-    {
-        type            empty;
+        name               customBC_T;
+        type			   codedMixed;
+        refValue       $internalField;
+        refGradient         uniform 0;
+        valueFraction       uniform 1; // 0 for heat flux, 1 for temperature
+        // code in codeDict: customBC_T
     }
 
     eastSlope
     {
-        type            noSlip;
+        type            fixedValue;
+        value           uniform 400;
     }
 
     eastLedge
     {
-        type            noSlip;
+        type            fixedValue;
+        value           uniform 350;
     }
 
     westLedge
     {
-        type            noSlip;
+        type            fixedValue;
+        value           uniform 300;
     }
 
     westSlope
     {
-        type            noSlip;
+        type            fixedValue;
+        value           uniform 300;
     }
 
     topFace
     {
-        type            noSlip;
+        type            fixedValue;
+        value           uniform 380;
     }
 }
 
 
 // ************************************************************************* //
+

@@ -1,3 +1,4 @@
+import os
 import argparse
 import subprocess
 
@@ -11,18 +12,17 @@ def modify_boundary_conditions(host_dir, boundary_conditions):
             file.write(content)
 
 
-def run_openfoam(
-    container_name, host_dir, container_dir, script_name, boundary_conditions
-):
-    # Ensure host directory exists and prepare it
+def run_openfoam(container_name, host_dir, container_dir, script_name):
     # subprocess.run(["mkdir", "-p", host_dir], check=True)
+
+    abs_host_dir = os.path.abspath(host_dir)
 
     docker_command = [
         "docker",
         "run",
         "-it",
         "--mount",
-        f"type=bind,source={host_dir},target={container_dir}",
+        f"type=bind,source={abs_host_dir},target={container_dir}",
         container_name,
         "/bin/bash",
         "-c",
@@ -40,18 +40,14 @@ def main():
     args = parser.parse_args()
 
     # container_name = "my-openfoam:latest"
-    host_dir = "/home/ilya/github/atmosphere2/models/building-twins"
+    host_dir = "../../models/building-twins"
     container_dir = "/home/foam/openfoam"
-    boundary_conditions = {
-        "case/system/boundaryConditions": "/* Your boundary condition settings */"
-    }
 
     run_openfoam(
         args.container_name,
         host_dir,
         container_dir,
         args.script_name,
-        boundary_conditions,
     )
 
 
