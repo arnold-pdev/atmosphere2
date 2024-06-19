@@ -28,11 +28,10 @@ scriptVersion="2022-01-10"
 #        ln -s openfoam-docker openfoam2112-run
 #
 #------------------------------------------------------------------------------
-printHelp()
-{
-    defaultImage="${imageBasename}${imageFlavour}:${openfoamVersion}"
+printHelp() {
+	defaultImage="${imageBasename}${imageFlavour}:${openfoamVersion}"
 
-    cat<<HELP_HEAD
+	cat <<HELP_HEAD
 
 Usage: ${0##*/} [OPTION] [-- application ...]
        ${0##*/} [OPTION] [command_string]
@@ -51,9 +50,8 @@ options:
   -verbose          Additional verbosity when starting (FOAM_VERBOSE)
 HELP_HEAD
 
-if [ -n "$1" ]
-then
-cat<<'HELP_FULL'
+	if [ -n "$1" ]; then
+		cat <<'HELP_FULL'
   -entry=PATH       Alternative entry point
   -image=NAME | -i=NAME
                     Specify image to run
@@ -63,9 +61,9 @@ cat<<'HELP_FULL'
   -xhost            Allow container access to host network (implies -X)
   --shm-size=BYTES  Size of /dev/shm (eg, --shm-size=4G)
 HELP_FULL
-fi
+	fi
 
-cat<<TAIL_OPTIONS
+	cat <<TAIL_OPTIONS
   --                The end of option processing.
                     An argument of - or / is equivalent to --.
   -h | -help        Display short help and exit
@@ -84,9 +82,8 @@ Note:
 
 TAIL_OPTIONS
 
-if [ -n "$1" ]
-then
-    cat<<HELP_FULL
+	if [ -n "$1" ]; then
+		cat <<HELP_FULL
 Equivalent options:
   | -dir=DIR  | -case=DIR | -case DIR | -home=DIR
 
@@ -100,9 +97,9 @@ Note:
   access to network communication (potentially insecure).
 
 HELP_FULL
-fi
+	fi
 
-cat<<'FOOTER'
+	cat <<'FOOTER'
 Note:
     Different OpenFOAM components and modules may be present (or missing)
     on any particular container image.
@@ -113,23 +110,23 @@ For more information: www.openfoam.com
 
 FOOTER
 
-    exit 0  # A clean exit
+	exit 0 # A clean exit
 }
-
 
 # Report error and exit
-die()
-{
-    exec 1>&2
-    echo
-    echo "Error encountered:"
-    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
-    echo
-    echo "See '${0##*/} -help' for usage"
-    echo
-    exit 1
+die() {
+	exec 1>&2
+	echo
+	echo "Error encountered:"
+	while [ "$#" -ge 1 ]; do
+		echo "    $1"
+		shift
+	done
+	echo
+	echo "See '${0##*/} -help' for usage"
+	echo
+	exit 1
 }
-
 
 #------------------------------------------------------------------------------
 # Constants - user name/locations MUST correspond to the image assets
@@ -138,11 +135,10 @@ toolChain=docker
 container_home='/home/openfoam'         # Home for container user
 container_tmphome='/tmp/.home.openfoam' # Fake home for container user
 
-
 #------------------------------------------------------------------------------
 
 # Select 'podman' toolchain if mentioned in script name:
-case "${0##*/}" in (*-podman*) toolChain=podman;; esac
+case "${0##*/}" in *-podman*) toolChain=podman ;; esac
 
 # Get openfoam version and/or image flavour from script name
 # "/path/openfoam{VERSION}"
@@ -151,28 +147,38 @@ case "${0##*/}" in (*-podman*) toolChain=podman;; esac
 imageTag="$(echo "${0##*/}" | sed -ne 's/openfoam\([1-9][0-9]*\).*/\1/ip')"
 
 # Version:
-if [ -n "$imageTag" ]
-then
-    openfoamVersion="$imageTag"
+if [ -n "$imageTag" ]; then
+	openfoamVersion="$imageTag"
 fi
 
 # Flavour:
 imageTag="-${0##*-}"
 case "$imageTag" in
-(-base)
-    unset imageFlavour
-    ;;
-(-run | -default)
-    imageFlavour="$imageTag"
-    ;;
-(-dev*)
-    imageFlavour="-dev"
-    ;;
-(-tut*)
-    imageFlavour="-tutorials"
-    ;;
+-base)
+	unset imageFlavour
+	;;
+-run | -default)
+	imageFlavour="$imageTag"
+	;;
+-dev*)
+	imageFlavour="-dev"
+	;;
+-tut*)
+	imageFlavour="-tutorials"
+	;;
 esac
 
+#------------------------------------------------------------------------------
+# Default local directory
+localDir="../../local" # Default path, change if needed
+
+# Convert to absolute path
+if [ -d "$localDir" ]; then
+	localDir="$(cd "$localDir" && pwd -P)"
+else
+	echo "${0##*/}: Default local directory does not exist: $localDir" 1>&2
+	exit 1 # Exit if the default directory is invalid
+fi
 
 #------------------------------------------------------------------------------
 # Parse options
@@ -182,134 +188,132 @@ unset mount1Dir mount2Dir
 unset optDryrun optEntrypoint optShellCommand optUpdate optVerbose optShmSize
 unset optX11Forwarding
 
-while [ "$#" -gt 0 ]
-do
-    case "$1" in
-    ('') ;;
-    (- | -- | /)
-        shift
-        break   # Stop option parsing
-        ;;
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	'') ;;
+	- | -- | /)
+		shift
+		break # Stop option parsing
+		;;
 
-    # OpenFOAM versions (eg, -2112, -2106, -2012, etc)
-    (-[1-9]*)   openfoamVersion="${1#*-}" ;;
-    (-v[1-9]*)  openfoamVersion="${1#*-v}" ;;
+	# OpenFOAM versions (eg, -2112, -2106, -2012, etc)
+	-[1-9]*) openfoamVersion="${1#*-}" ;;
+	-v[1-9]*) openfoamVersion="${1#*-v}" ;;
 
-    # Image flavours
-    (-base)     unset imageFlavour ;;
-    (-run)      imageFlavour="-run" ;;
-    (-def*)     imageFlavour="-default" ;;
-    (-dev*)     imageFlavour="-dev" ;;
-    (-tut*)     imageFlavour="-tutorials" ;;
+	# Image flavours
+	-base) unset imageFlavour ;;
+	-run) imageFlavour="-run" ;;
+	-def*) imageFlavour="-default" ;;
+	-dev*) imageFlavour="-dev" ;;
+	-tut*) imageFlavour="-tutorials" ;;
 
-    (-c)  # Shell command
-        optShellCommand="-c"
-        ;;
+	-c) # Shell command
+		optShellCommand="-c"
+		;;
 
-    (-help-f*)   # Full help
-        printHelp -full
-        ;;
+	-help-f*) # Full help
+		printHelp -full
+		;;
 
-    (-h | -help* | --help*)  # Short help
-        printHelp
-        ;;
+	-h | -help* | --help*) # Short help
+		printHelp
+		;;
 
-    (-docker | -podman)
-        toolChain="${1#*-}"
-        ;;
-    (-sudo)     # Use sudo
-        sudo="sudo"
-        ;;
-    (--shm-size=*)
-        optShmSize="${1#*=}"
-        ;;
+	-docker | -podman)
+		toolChain="${1#*-}"
+		;;
+	-sudo) # Use sudo
+		sudo="sudo"
+		;;
+	--shm-size=*)
+		optShmSize="${1#*=}"
+		;;
 
-    (-case)
-        # OpenFOAM-style '-case' for specfying the HOME mount
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        shift
-        mount1Dir="$1"
-        ;;
+	-case)
+		# OpenFOAM-style '-case' for specfying the HOME mount
+		[ "$#" -ge 2 ] || die "'$1' option requires an argument"
+		shift
+		mount1Dir="$1"
+		;;
 
-    # Various ways to specify the HOME mount
-    (-case=* | -dir=* | -home=*)
-        mount1Dir="${1#*=}"
-        ;;
+	# Various ways to specify the HOME mount
+	-case=* | -dir=* | -home=*)
+		mount1Dir="${1#*=}"
+		;;
 
-    # Additional DATA mount
-    (-data=*)
-        mount2Dir="${1#*=}"
-        ;;
-    (-entry=*)            # Alternative entrypoint
-        optEntrypoint="${1#*=}"
-        ;;
-    (-i=* | -image=*)     # Alternative image name
-        image="${1#*=}"
-        ;;
+	# Additional DATA mount
+	-data=*)
+		mount2Dir="${1#*=}"
+		;;
+	-entry=*) # Alternative entrypoint
+		optEntrypoint="${1#*=}"
+		;;
+	-i=* | -image=*) # Alternative image name
+		image="${1#*=}"
+		;;
 
-    (-update | -upgrade)  # Also allow 'upgrade' (for Ubunutu people)
-        optUpdate=true
-        ;;
-    (-dry-run | -dryrun)
-        optDryrun=true
-        ;;
-    (-verbose)
-        optVerbose=true
-        ;;
+	# Additional LOCAL mount
+	-local=*)
+		localDir="${1#*=}"
+		;;
 
-    (-X)        # Enable X11 forwarding
-        : "${optX11Forwarding:=X}"
-        ;;
-    (-x)        # Disable X11 forwarding
-        unset optX11Forwarding
-        ;;
-    (-xhost)    # Any host X11 forwarding
-        optX11Forwarding="host"
-        ;;
+	-update | -upgrade) # Also allow 'upgrade' (for Ubunutu people)
+		optUpdate=true
+		;;
+	-dry-run | -dryrun)
+		optDryrun=true
+		;;
+	-verbose)
+		optVerbose=true
+		;;
 
-    (-*)
-        die "Invalid option '$1'"
-        ;;
-    (*)
-        if [ -n "$optShellCommand" ]
-        then
-            break
-        else
-            die "Unexpected argument '$1'"
-        fi
-        ;;
-    esac
-    shift
+	-X) # Enable X11 forwarding
+		: "${optX11Forwarding:=X}"
+		;;
+	-x) # Disable X11 forwarding
+		unset optX11Forwarding
+		;;
+	-xhost) # Any host X11 forwarding
+		optX11Forwarding="host"
+		;;
+
+	-*)
+		die "Invalid option '$1'"
+		;;
+	*)
+		if [ -n "$optShellCommand" ]; then
+			break
+		else
+			die "Unexpected argument '$1'"
+		fi
+		;;
+	esac
+	shift
 done
 
-if [ -z "$image" ]
-then
-    image="${imageBasename}${imageFlavour}:${openfoamVersion}"
+if [ -z "$image" ]; then
+	image="${imageBasename}${imageFlavour}:${openfoamVersion}"
 fi
 
-if [ -n "$optUpdate" ]
-then
-    if [ -n "$optDryrun" ]
-    then
-        runPrefix="echo"
-        echo "(dry-run)" 1>&2
-        echo 1>&2
-    else
-        runPrefix="$sudo"
-        echo "Update image: $image" 1>&2
-    fi
-    $runPrefix ${toolChain:?} pull "$image"
-    exitCode="$?"
-    echo 1>&2
-    echo "Done" 1>&2
-    exit "$exitCode"
+if [ -n "$optUpdate" ]; then
+	if [ -n "$optDryrun" ]; then
+		runPrefix="echo"
+		echo "(dry-run)" 1>&2
+		echo 1>&2
+	else
+		runPrefix="$sudo"
+		echo "Update image: $image" 1>&2
+	fi
+	$runPrefix ${toolChain:?} pull "$image"
+	exitCode="$?"
+	echo 1>&2
+	echo "Done" 1>&2
+	exit "$exitCode"
 fi
 
-if [ -n "$optShellCommand" ] && [ "$#" -eq 0 ]
-then
-    die "-c: option requires an argument"
+if [ -n "$optShellCommand" ] && [ "$#" -eq 0 ]; then
+	die "-c: option requires an argument"
 fi
-
 
 #------------------------------------------------------------------------------
 
@@ -321,33 +325,27 @@ guest_gid="$(id -g 2>/dev/null)"
 [ -n "$guest_gid" ] || die "Cannot determine current group id"
 
 # Mount directory (mandatory)
-if [ -z "$mount1Dir" ]
-then
-    mount1Dir="$(pwd -P)"  # Default is current directory
-elif [ -d "$mount1Dir" ]
-then
-    mount1Dir="$(cd "$mount1Dir" && pwd -P)"
+if [ -z "$mount1Dir" ]; then
+	mount1Dir="$(pwd -P)" # Default is current directory
+elif [ -d "$mount1Dir" ]; then
+	mount1Dir="$(cd "$mount1Dir" && pwd -P)"
 else
-    die "No such mount directory: $mount1Dir"
+	die "No such mount directory: $mount1Dir"
 fi
-if [ "$mount1Dir" = "$(cd "$HOME" && pwd -P)" ]
-then
-    die "Cannot use home directory as the mount-point" \
-        "Run from a subdirectory instead"
+if [ "$mount1Dir" = "$(cd "$HOME" && pwd -P)" ]; then
+	die "Cannot use home directory as the mount-point" \
+		"Run from a subdirectory instead"
 fi
 
 # Data directory (optional)
-if [ -n "$mount2Dir" ]
-then
-    if [ -d "$mount2Dir" ]
-    then
-        mount2Dir="$(cd "$mount2Dir" && pwd -P)"
-    else
-        echo "${0##*/}: ignore invalid -data directory: $mount2Dir" 1>&2
-        unset mount2Dir
-    fi
+if [ -n "$mount2Dir" ]; then
+	if [ -d "$mount2Dir" ]; then
+		mount2Dir="$(cd "$mount2Dir" && pwd -P)"
+	else
+		echo "${0##*/}: ignore invalid -data directory: $mount2Dir" 1>&2
+		unset mount2Dir
+	fi
 fi
-
 
 # Older (non-nss) user/group handling
 # userMapping()
@@ -357,7 +355,6 @@ fi
 #     echo '--volume=/etc/shadow:/etc/shadow:ro'
 #     echo '--volume=/etc/sudoers.d:/etc/sudoers.d:ro'
 # }
-
 
 # Environment and settings for X11 forwarding
 #
@@ -369,74 +366,64 @@ fi
 # - use tmp Xauthority file in local (mounted) directory
 unset display_host tmpXauth_host tmpXauth_guest
 
-if [ -n "$DISPLAY" ] \
-&& [ -n "$optX11Forwarding" ] \
-&& [ -d "$mount1Dir" ] \
-&& command -v xauth >/dev/null
-then
-    # DISPLAY="host:0" vs DISPLAY=":0"
-    display_host="${DISPLAY%%:*}"
+if [ -n "$DISPLAY" ] &&
+	[ -n "$optX11Forwarding" ] &&
+	[ -d "$mount1Dir" ] &&
+	command -v xauth >/dev/null; then
+	# DISPLAY="host:0" vs DISPLAY=":0"
+	display_host="${DISPLAY%%:*}"
 
-    tmpXauth_host="$(mktemp --tmpdir="$mount1Dir" .Xauthority.container.XXXX)"
-    trap "rm -f \"$tmpXauth_host\"; exit 0" EXIT TERM INT  # Remove on exit
+	tmpXauth_host="$(mktemp --tmpdir="$mount1Dir" .Xauthority.container.XXXX)"
+	trap "rm -f \"$tmpXauth_host\"; exit 0" EXIT TERM INT # Remove on exit
 
-    # X-authority file to allow any hostname. Generally reasonably safe
-    xauth nlist "$DISPLAY" | sed -e 's/^..../ffff/' | \
-    xauth -f "$tmpXauth_host" nmerge -
+	# X-authority file to allow any hostname. Generally reasonably safe
+	xauth nlist "$DISPLAY" | sed -e 's/^..../ffff/' |
+		xauth -f "$tmpXauth_host" nmerge -
 
-    # The mounted name
-    tmpXauth_guest="${container_home}/${tmpXauth_host##*/}"
+	# The mounted name
+	tmpXauth_guest="${container_home}/${tmpXauth_host##*/}"
 fi
-
 
 # Define container run options for X11 mapping
-x11Mapping()
-{
-    if [ -n "$tmpXauth_guest" ]
-    then
-        echo "--env=DISPLAY=$DISPLAY"
-        echo "--env=XAUTHORITY=$tmpXauth_guest"
+x11Mapping() {
+	if [ -n "$tmpXauth_guest" ]; then
+		echo "--env=DISPLAY=$DISPLAY"
+		echo "--env=XAUTHORITY=$tmpXauth_guest"
 
-        # Accessing via ssh -X ('localhost:0' etc) or forced with -xhost
-        if [ -n "$display_host" ] || [ "$optX11Forwarding" = host ]
-        then
-            echo "--net=host"
-        elif [ -d /tmp/.X11-unix ]  # No display host, bind sockets
-        then
-            echo "--volume=/tmp/.X11-unix:/tmp/.X11-unix"
-        fi
-    fi
+		# Accessing via ssh -X ('localhost:0' etc) or forced with -xhost
+		if [ -n "$display_host" ] || [ "$optX11Forwarding" = host ]; then
+			echo "--net=host"
+		elif [ -d /tmp/.X11-unix ]; then # No display host, bind sockets
+			echo "--volume=/tmp/.X11-unix:/tmp/.X11-unix"
+		fi
+	fi
 }
 
-
-if [ "$optVerbose" = true ]
-then
-    set -x
+if [ "$optVerbose" = true ]; then
+	set -x
 fi
 
-if [ -n "$optDryrun" ]
-then
-    runPrefix="echo"
-    echo "(dry-run)" 1>&2
-    echo 1>&2
+if [ -n "$optDryrun" ]; then
+	runPrefix="echo"
+	echo "(dry-run)" 1>&2
+	echo 1>&2
 else
-    runPrefix="$sudo"
+	runPrefix="$sudo"
 fi
 
-if [ "$optVerbose" = true ]
-then
-    set -x
+if [ "$optVerbose" = true ]; then
+	set -x
 fi
 
 exec $runPrefix ${toolChain:?} run \
-    --rm -t -i \
-    --user="$guest_uid:$guest_gid" \
-    ${mount1Dir:+--volume="$mount1Dir:$container_home"} \
-    ${mount2Dir:+--volume="$mount2Dir:/data"} \
-    $(x11Mapping) \
-    ${optShmSize:+--shm-size="$optShmSize"} \
-    ${optEntrypoint:+--entrypoint="$optEntrypoint"} \
-    "$image" $optShellCommand "$@"
+	--rm -t -i \
+	--user="$guest_uid:$guest_gid" \
+	${mount1Dir:+--volume="$mount1Dir:$container_home"} \
+	${mount2Dir:+--volume="$mount2Dir:/data"} \
+	--volume="$localDir:/local" \
+	$(x11Mapping) \
+	${optShmSize:+--shm-size="$optShmSize"} \
+	${optEntrypoint:+--entrypoint="$optEntrypoint"} \
+	"$image" $optShellCommand "$@"
 
 # ---------------------------------------------------------------------------
-
