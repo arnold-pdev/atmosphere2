@@ -1,0 +1,72 @@
+@startuml
+
+title
+Class diagrammed od PINO software
+end title
+
+package Data #DDDDDD {
+
+class X {
+x: float
+y: float
+getPoint()
+}
+
+class Points{
+<latex>\{ \vec{x_1}, \vec{x_2}, ..\vec{x_N} \} \in \mathbb{R}^2  </latex> : Set
+}
+Points::x_1 <.. X
+
+
+class U {
+{field}<latex>\vec{v}(\vec{x})</latex> : Vector
+{field}<latex>\Theta(\vec{x}) \in \mathbb{R}</latex> : float
+{field}<latex>p(\vec{x}) \in \mathbb{R}</latex> : float
+getState()
+}
+
+class Motion{
+ <latex>\mathcal{M}</latex>: BoundaryConditions
+{field} u(t) : TimeSeries
+}
+Motion::u <.. U
+Motion::U <..Points
+
+U::p <.. X
+U::Theta <.. X
+U::v <.. X
+
+class BoundaryConditions{
+- thermophysical properties: Scalar
+- source terms: ¿?
+- <latex>\nu</latex>
+- <latex>\rho</latex>
+}
+Motion::Mu<..BoundaryConditions
+
+}
+package "Physics-Informed Neural Operator" #DDDDDD {
+
+
+class FourierTransform{
+frequencies : list
+<latex>\mathcal{F}</latex>(u(t))
+}
+FourierTransform::F <..Motion::u
+
+class NeuralNetwork{
+frequencies : list
+train()
+<latex>L(\hat{y},y)</latex> + physics equations()
+}
+
+NeuralNetwork::train <..  FourierTransform::frequencies
+
+class  InverseFourierTransform{
+{field}<latex>\hat{u}(t)</latex>: TimeSeries
+<latex>\mathcal{F}^{-1}</latex>(frequencies)
+}
+InverseFourierTransform::F<..NeuralNetwork::frequencies
+}
+
+@enduml
