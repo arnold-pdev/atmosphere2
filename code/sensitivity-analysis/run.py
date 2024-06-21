@@ -16,13 +16,17 @@ def run_openfoam(container_name, host_dir, container_dir, script_name):
     # subprocess.run(["mkdir", "-p", host_dir], check=True)
 
     abs_host_dir = os.path.abspath(host_dir)
+    abs_local_dir = os.path.abspath("../../local")
 
     docker_command = [
         "docker",
         "run",
+        "--rm",
         "-it",
         "--mount",
         f"type=bind,source={abs_host_dir},target={container_dir}",
+        "--mount",
+        f"type=bind,source={abs_local_dir},target=/local",
         container_name,
         "/bin/bash",
         "-c",

@@ -7,6 +7,7 @@ RUN apt install -y wget
 
 # install essentials
 RUN apt-get update 
+RUN apt-get install -y rsync
 RUN apt-get install -y ssh
 RUN apt-get install -y curl
 RUN apt-get install -y nano
