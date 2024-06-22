@@ -6,6 +6,7 @@ import gmsh  # https:#gmsh.info/dev/doc/texinfo/gmsh.pdf#Gmsh%20application%20pr
 # mesh refinement: https:#gitlab.onelab.info/gmsh/gmsh/blob/gmsh_4_8_3/tutorial/python/t10.py
 from icecream import ic
 
+
 # find the path to the default geo file using os
 dirname = os.path.dirname(
     __file__
@@ -240,6 +241,8 @@ def geometry1_unstructured(output_file, lc_wall=0.01, lc_bulk=0.1):
 
     gmsh.model.addPhysicalGroup(3, [ov[1][1]], 1000, "interior")
 
+    gmsh.option.setNumber("General.Terminal", 0)
+
     gmsh.model.mesh.generate(3)
     gmsh.write(output_file)  # writes the model to a file
     gmsh.finalize()
@@ -269,11 +272,38 @@ def parse_arguments():
     return args
 
 
-def main(lc_wall=0.1, lc_bulk=1, type="unstructured", output_file="g1.msh"):
+def check_parameters():
+    walls = np.arange(0.05, 0.2, 0.01)
+    bulks = np.arange(0.5, 3.0, 0.1)
+
+    n = walls.shape[0]
+    m = bulks.shape[0]
+
+    check_table = np.zeros((n, m), dtype=int)
+
+    for i in range(n):
+        for j in range(m):
+            try:
+                generate_mesh(walls[i], bulks[j])
+                check_table[i, j] = 1
+            except:
+                check_table[i, j] = 0
+
+    print(check_table)
+    print(check_table.shape)
+    return
+
+
+def generate_mesh(lc_wall=0.1, lc_bulk=1, type="unstructured", output_file="g1.msh"):
     if type == "structured":
         exit("Structured mesh not implemented")
     elif type == "unstructured":
         geometry1_unstructured(output_file, lc_wall, lc_bulk)
+
+
+def main(lc_wall, lc_bulk):
+    # generate_mesh(lc_wall, lc_bulk)
+    check_parameters()
 
 
 if __name__ == "__main__":
