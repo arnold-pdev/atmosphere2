@@ -31,12 +31,10 @@ customBC_T
                 this->refValue()[i]  = //refValue or refGrad
                 // A*sin(2*pi/46*cf[i].x()) // sine
                 // -A*cf[i].x()*cf[i].x()/23.0/23.0 + A //parabolic
-                300-A*Foam::exp( -Foam::pow((cf[i].x() - B), 2) / (2*C*C) ) //gaussian
+                290-A*Foam::exp( -Foam::pow((cf[i].x() - B), 2) / (2*C*C) ) //gaussian
                 ;
-              }
+
             // refGrad:
-               forAll(patch, i)
-               {
                  this->refGrad()[i] = 0;
                }
             // valueFraction:
@@ -47,8 +45,15 @@ customBC_U
 {
     code
         #{
-           //  Define your constants, pull in the patch and face centers
-           const scalar A = 10, B = 0.0, C = 1.0;
+           //  Define your constants
+           //  vectical scales Ai
+           const scalar A1 = 2.0, A2 = -5.0, A3 = 7.0;
+           //  horizontal scales Bi
+           const scalar B1 = 2.0, B2 = 4.0, B3 = 2.0;
+           //  centers Ci
+           const scalar C1 = -20.0, C2 = 0.0, C3 = 20.0;
+           //  vertical shift D
+           const scalar D = 0.0;
            const scalar pi = 3.14159265358979323846;
            // access the face centers (Cf)
            const fvPatch& patch = this->patch();
@@ -56,24 +61,19 @@ customBC_U
             // refValue:
               forAll(patch, i)
               {
-                // if (abs(cf[i].x()) < 23.0/2.0 ) {
                     this->refValue()[i] = 
                     vector(
                         0, 
-                        0, 
-                    // -A*cf[i].x()*cf[i].x()/23.0/23.0 + A
-                        A*cos(2*pi/46*cf[i].x()) // sine
-                    // A*Foam::exp( -Foam::pow((cf[i].x() - B), 2) / (2*C*C) )
+                        A1*Foam::exp( -Foam::pow((cf[i].x() - B1), 2) / (2*C1*C1) ),
+                        //+ A2*Foam::exp( -Foam::pow((cf[i].x() - B2), 2) / (2*C2*C2) )
+                        //+ A3*Foam::exp( -Foam::pow((cf[i].x() - B3), 2) / (2*C3*C3) )
+                        //+ D,
+                        0
                     ) ;
-                // }
-                // else {
-                    // this->refValue()[i] = vector(0, 0, 0);
-                // }
+                 
             // refGrad:
-               forAll(patch, i)
-               {
                  this->refGrad()[i] = vector(0, 0, 0);
-               }
+
             // valueFraction:
               }
         #};
