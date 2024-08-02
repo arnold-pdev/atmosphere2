@@ -47,7 +47,7 @@ customBC_U
         #{
            //  Define your constants
            //  vectical scales Ai
-           const scalar A1 = 2.0, A2 = -5.0, A3 = 7.0;
+           const scalar A1 = 2.0, A2 = 0.0, A3 = 7.0;
            //  horizontal scales Bi
            const scalar B1 = 2.0, B2 = 4.0, B3 = 2.0;
            //  centers Ci
@@ -64,10 +64,10 @@ customBC_U
                     this->refValue()[i] = 
                     vector(
                         0, 
-                        A1*Foam::exp( -Foam::pow((cf[i].x() - B1), 2) / (2*C1*C1) ),
-                        //+ A2*Foam::exp( -Foam::pow((cf[i].x() - B2), 2) / (2*C2*C2) )
-                        //+ A3*Foam::exp( -Foam::pow((cf[i].x() - B3), 2) / (2*C3*C3) )
-                        //+ D,
+                        A1*Foam::exp( -Foam::pow((cf[i].x() - C1), 2) / (2*B1*B1) ) 
+                        + A2*Foam::exp( -Foam::pow((cf[i].x() - C2), 2) / (2*B2*B2) )
+                        + A3*Foam::exp( -Foam::pow((cf[i].x() - C3), 2) / (2*B3*B3) )
+                        + D,
                         0
                     ) ;
                  

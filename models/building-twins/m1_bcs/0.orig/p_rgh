@@ -20,23 +20,9 @@ internalField   uniform 0;
 
 boundaryField
 {
-    back
+    "(back|front)"
     {
         type            empty;
-    }
-
-    eastBase
-    {
-        type            fixedFluxPressure;
-        rho             rhok;
-        value           uniform 0;
-    }
-
-    westBase
-    {
-        type            fixedFluxPressure;
-        rho             rhok;
-        value           uniform 0;
     }
 
     bottom
@@ -46,43 +32,18 @@ boundaryField
         value           uniform 0;
     }
 
-    front
-    {
-        type            empty;
-    }
-
-    eastSlope
+    "(south.*|topFace|north.*)"
     {
         type            fixedFluxPressure;
         rho             rhok;
         value           uniform 0;
     }
 
-    eastLedge
+    outlet
     {
-        type            fixedFluxPressure;
+        type            totalPressure;
         rho             rhok;
-        value           uniform 0;
-    }
-
-    westLedge
-    {
-        type            fixedFluxPressure;
-        rho             rhok;
-        value           uniform 0;
-    }
-
-    westSlope
-    {
-        type            fixedFluxPressure;
-        rho             rhok;
-        value           uniform 0;
-    }
-
-    topFace
-    {
-        type            fixedFluxPressure;
-        rho             rhok;
+        p0             uniform 0;
         value           uniform 0;
     }
 }

@@ -1,0 +1,48 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2306                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+codedSource
+{
+    type            vectorCodedSource;
+    name            dragForce;
+    selectionMode   all;
+    fields          (U);
+
+    codeCorrect
+    #{ #};
+    codeConstrain
+    #{ #};
+    codeAddSup
+    #{
+        Info << "Adding drag force source term" << endl;
+        const vectorField& cf = mesh_.C();
+        const scalarField& V = mesh_.V();
+        const vectorField& U = mesh().lookupObject<volVectorField>("U");
+        vectorField& dragForce = eqn.source();
+        // define the coefficient functions
+        const scalar c = 0.0;
+
+        // Apply the drag force (given as an absolute value, rather than specific)
+        forAll(cf, i)
+        {
+            // dragForce[i] -= vector(10.0,0,10.0);
+            // dragForce[i] += 0.0*mag(U[i])*U[i]*V[i];
+            dragForce[i] += c*mag(U[i])*U[i]*V[i];
+        }
+        Info << max(dragForce) << endl;
+    #};
+}

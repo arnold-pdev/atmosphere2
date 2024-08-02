@@ -20,21 +20,9 @@ internalField   uniform 0.01;
 
 boundaryField
 {
-    back
+    "(back|front)"
     {
         type            empty;
-    }
-
-    eastBase
-    {
-        type            epsilonWallFunction;
-        value           uniform 0.01;
-    }
-
-    westBase
-    {
-        type            epsilonWallFunction;
-        value           uniform 0.01;
     }
 
     bottom
@@ -43,39 +31,17 @@ boundaryField
         value           uniform 0.01;
     }
 
-    front
-    {
-        type            empty;
-    }
-
-    eastSlope
+    "(south.*|topFace|north.*)"
     {
         type            epsilonWallFunction;
         value           uniform 0.01;
     }
 
-    eastLedge
+    outlet
     {
-        type            epsilonWallFunction;
-        value           uniform 0.01;
-    }
-
-    westLedge
-    {
-        type            epsilonWallFunction;
-        value           uniform 0.01;
-    }
-
-    westSlope
-    {
-        type            epsilonWallFunction;
-        value           uniform 0.01;
-    }
-
-    topFace
-    {
-        type            epsilonWallFunction;
-        value           uniform 0.01;
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
     }
 }
 

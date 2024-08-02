@@ -26,18 +26,6 @@ boundaryField
         type            empty;
     }
 
-    eastBase
-    {
-        type            fixedValue;
-        value           uniform 300;
-    }
-
-    westBase
-    {
-        type            fixedValue;
-        value           uniform 300;
-    }
-
     bottom
     {
         name               customBC_T;
@@ -48,34 +36,57 @@ boundaryField
         // code in codeDict: customBC_T
     }
 
-    eastSlope
+    "(southBelow|northBelow)"
     {
         type            fixedValue;
-        value           uniform 400;
+        value           uniform 295;
     }
 
-    eastLedge
-    {
-        type            fixedValue;
-        value           uniform 350;
-    }
-
-    westLedge
+    southBase
     {
         type            fixedValue;
         value           uniform 300;
     }
 
-    westSlope
+    northBase
     {
         type            fixedValue;
         value           uniform 300;
+    }
+
+    "(southSlope1|southSlope2|southSlope3)"
+    {
+        type            fixedValue;
+        value           uniform 305;
+    }
+
+    "(northSlope1|northSlope2|northSlope3)"
+    {
+        type            fixedValue;
+        value           uniform 320;
+    }
+
+    "(southLedge1|southLedge2)"
+    {
+        type            fixedValue;
+        value           uniform 305;
+    }
+
+    "(northLedge1|northLedge2)"
+    {
+        type            fixedValue;
+        value           uniform 315;
+    }
+
+    outlet
+    {
+        type            zeroGradient;
     }
 
     topFace
     {
         type            fixedValue;
-        value           uniform 380;
+        value           uniform 315;
     }
 }
 

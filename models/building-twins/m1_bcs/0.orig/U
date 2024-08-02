@@ -20,19 +20,9 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    back
+    "(back|front)"
     {
         type            empty;
-    }
-
-    eastBase
-    {
-        type            noSlip;
-    }
-
-    westBase
-    {
-        type            noSlip;
     }
 
     bottom
@@ -45,34 +35,16 @@ boundaryField
         // check codeDict for the code
     }
 
-    front
-    {
-        type            empty;
-    }
-
-    eastSlope
+    "(south.*|topFace|north.*)"
     {
         type            noSlip;
     }
 
-    eastLedge
+    outlet
     {
-        type            noSlip;
-    }
-
-    westLedge
-    {
-        type            noSlip;
-    }
-
-    westSlope
-    {
-        type            noSlip;
-    }
-
-    topFace
-    {
-        type            noSlip;
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
+        value           uniform (0 0 0);
     }
 }
 

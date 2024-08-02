@@ -20,21 +20,9 @@ internalField   uniform 0;
 
 boundaryField
 {
-    back
+    "(back|front)"
     {
         type            empty;
-    }
-
-    eastBase
-    {
-        type            nutkWallFunction;
-        value           uniform 0;
-    }
-
-    westBase
-    {
-        type            nutkWallFunction;
-        value           uniform 0;
     }
 
     bottom
@@ -43,39 +31,15 @@ boundaryField
         value           uniform 0;
     }
 
-    front
-    {
-        type            empty;
-    }
-
-    eastSlope
+    "(south.*|topFace|north.*)"
     {
         type            nutkWallFunction;
         value           uniform 0;
     }
 
-    eastLedge
+    outlet
     {
-        type            nutkWallFunction;
-        value           uniform 0;
-    }
-
-    westLedge
-    {
-        type            nutkWallFunction;
-        value           uniform 0;
-    }
-
-    westSlope
-    {
-        type            nutkWallFunction;
-        value           uniform 0;
-    }
-
-    topFace
-    {
-        type            nutkWallFunction;
-        value           uniform 0;
+        type            zeroGradient;
     }
 }
 

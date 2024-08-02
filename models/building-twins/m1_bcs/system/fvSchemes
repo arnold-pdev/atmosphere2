@@ -16,7 +16,7 @@ FoamFile
 
 ddtSchemes
 {
-    default         Euler;
+    default         Euler; // most stable; consider CrankNicolson with 0.9
 }
 
 gradSchemes
@@ -28,8 +28,8 @@ divSchemes
 {
     default         none;
 
-    div(phi,U)      Gauss upwind;
-    div(phi,T)      Gauss upwind;
+    div(phi,U)      Gauss limitedLinearV 1.0; // upwind or linear refers to the interpolation scheme (changing from Gauss upwind to Gauss limitedLinearV)
+    div(phi,T)      Gauss limitedLinear 1.0;
 
     turbulence      Gauss upwind;
     div(phi,k)      $turbulence;
@@ -42,7 +42,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear uncorrected;
+    default         Gauss linear uncorrected; // see snGradSchemes
 }
 
 interpolationSchemes
@@ -52,7 +52,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         uncorrected;
+    default         corrected; // currently, corrected should be used (max non-ortho ~ 33)
 }
 
 

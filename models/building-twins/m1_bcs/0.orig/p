@@ -20,21 +20,9 @@ internalField   uniform 0;
 
 boundaryField
 {
-    back
+    "(back|front)"
     {
         type            empty;
-    }
-
-    eastBase
-    {
-        type            calculated;
-        value           $internalField;
-    }
-
-    westBase
-    {
-        type            calculated;
-        value           $internalField;
     }
 
     bottom
@@ -43,39 +31,15 @@ boundaryField
         value           $internalField;
     }
 
-    front
-    {
-        type            empty;
-    }
-
-    eastSlope
+    "(south.*|topFace|north.*)"
     {
         type            calculated;
         value           $internalField;
     }
 
-    eastLedge
+    outlet
     {
-        type            calculated;
-        value           $internalField;
-    }
-
-    westLedge
-    {
-        type            calculated;
-        value           $internalField;
-    }
-
-    westSlope
-    {
-        type            calculated;
-        value           $internalField;
-    }
-
-    topFace
-    {
-        type            calculated;
-        value           $internalField;
+        type            zeroGradient;
     }
 }
 

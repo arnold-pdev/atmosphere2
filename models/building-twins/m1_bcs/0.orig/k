@@ -20,21 +20,9 @@ internalField   uniform 0.1;
 
 boundaryField
 {
-    back
+    "(back|front)"
     {
         type            empty;
-    }
-
-    eastBase
-    {
-        type            kqRWallFunction;
-        value           uniform 0.1;
-    }
-
-    westBase
-    {
-        type            kqRWallFunction;
-        value           uniform 0.1;
     }
 
     bottom
@@ -43,40 +31,17 @@ boundaryField
         value           uniform 0.1;
     }
 
-    front
-    {
-        type            empty;
-    }
-
-    eastSlope
+    "(south.*|topFace|north.*)"
     {
         type            kqRWallFunction;
         value           uniform 0.1;
     }
 
-    eastLedge
+    outlet
     {
-        type            kqRWallFunction;
-        value           uniform 0.1;
+        type            zeroGradient;
     }
 
-    westLedge
-    {
-        type            kqRWallFunction;
-        value           uniform 0.1;
-    }
-
-    westSlope
-    {
-        type            kqRWallFunction;
-        value           uniform 0.1;
-    }
-
-    topFace
-    {
-        type            kqRWallFunction;
-        value           uniform 0.1;
-    }
 }
 
 
