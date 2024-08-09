@@ -30,7 +30,7 @@ def run_openfoam(container_name, host_dir, container_dir, script_name):
         container_name,
         "/bin/bash",
         "-c",
-        f"source /usr/lib/openfoam/openfoam/etc/bashrc && cd {container_dir} && ./{script_name}",
+        f"source /usr/lib/openfoam/openfoam/etc/bashrc && cd {container_dir} && ./{script_name} -vtk",
     ]
 
     subprocess.run(docker_command, check=True)

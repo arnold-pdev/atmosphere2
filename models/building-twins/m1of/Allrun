@@ -30,30 +30,40 @@ vtk_flag=0
 
 # Check each argument
 for arg in "$@"; do
-	if [[ "$arg" == "-vtk" ]]; then
-		vtk_flag=1
-		break
-	fi
+  if [[ "$arg" == "-vtk" ]]; then
+    vtk_flag=1
+    break
+  fi
 done
 
 if [[ $vtk_flag -eq 1 ]]; then
-	echo "-vtk argument detected"
-	runApplication foamToVTK -fields '(U p T)'
-	current_time=$(date "+%m-%d-%Y_%H.%M.%S")
-	mv VTK "VTK_$current_time"
+  echo "-vtk argument detected"
+  runApplication foamToVTK -fields '(U p T)'
+  current_time=$(date "+%m-%d-%Y_%H.%M.%S")
+  mv VTK "VTK_$current_time"
 fi
 
+#-------------------------------move to local------------------------------------
 # Create another snapshot after the execution
 target_dir="/local/$(basename $(pwd))"
 mkdir -p "$target_dir"
 
 snapshot_after=$(mktemp)
 find . -type f -exec md5sum {} + >"$snapshot_after"
-rsync -aq --files-from=<(comm -13 <(sort "$snapshot_before") <(sort "$snapshot_after") | cut -d ' ' -f 3) . "$target_dir/"
+
+# Copy all files to the target directory
+rsync -a . "$target_dir/"
+
+# Copy only created files to the target directory
+# rsync -aq --files-from=<(comm -13 <(sort "$snapshot_before") <(sort "$snapshot_after") | cut -d ' ' -f 3) . "$target_dir/"
+
+# Identify and delete only the newly created files
 for file in $(comm -13 <(sort "$snapshot_before") <(sort "$snapshot_after") | cut -d ' ' -f 3); do
-	if [ -f "$file" ]; then
-		rm "$file"
-	fi
+  if [ -f "$file" ]; then
+    rm "$file"
+  fi
 done
+
+# Clean up empty directories and temporary files
 find . -type d -empty -delete
 rm "$snapshot_before" "$snapshot_after"
