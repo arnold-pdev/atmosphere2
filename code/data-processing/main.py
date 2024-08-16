@@ -232,7 +232,7 @@ def make_plots(
     orig_data,
     rec_data,
     dir_name="plots",
-    path_name="figures",
+    path_name="../../local/figures",
 ):
     full_path = os.path.join(path_name, dir_name)
     if not os.path.exists(full_path):
@@ -268,9 +268,9 @@ def make_plots(
 
 
 def main():
-    data_path = "../../models/building-twins/m1of"
-    save_path = "../../models/building-twins/m1of-rec"
-    svd_rank = 1
+    data_path = "../../local/m1of"
+    save_path = "../../local/m1of-rec"
+    svd_rank = 5
 
     time_steps, data_matrix = load_data(data_path)
     ic(time_steps.shape)
